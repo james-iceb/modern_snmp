@@ -90,7 +90,7 @@ mod security_params;
 
 pub use auth_key::{AuthKey, Digest};
 pub use error::SecurityError;
-pub use localized_key::{LocalizedKey, WithLocalizedKey};
+pub use localized_key::{LocalizedKey, WithLocalizedKey, ExtensionVariant};
 pub use md5::Md5;
 pub use priv_key::{AesPrivKey, DesPrivKey, PrivKey};
 pub use security_params::SecurityParams;

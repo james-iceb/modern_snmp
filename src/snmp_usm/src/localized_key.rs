@@ -27,6 +27,12 @@ pub struct LocalizedKey<'a, D> {
     orig_len: usize,
 }
 
+pub enum ExtensionVariant {
+    // Based on 3.1.2.1 from draft-blumenthal-aes-usm-04.txt
+    Blumenthal,
+    Cisco,
+}
+
 impl<'a, D> LocalizedKey<'a, D> {
     pub(crate) fn bytes(&self) -> &[u8] {
         &self.bytes[..self.orig_len]
@@ -45,6 +51,8 @@ where
     ///
     /// The password should be at least 8 characters in length.
     ///
+    /// This is equivalent to calling new_with_extension_variant with ExtensionVariant::Blumenthal
+    ///
     /// # Panics
     ///
     /// Panics if `passwd` has length 0.
@@ -57,25 +65,52 @@ where
     /// let key = LocalizedMd5Key::new(b"password", b"engine_id");
     /// ```
     pub fn new(passwd: &[u8], engine_id: &[u8]) -> Self {
-        let mut bytes = vec![];
+        Self::new_with_extension_variant(passwd, engine_id, ExtensionVariant::Blumenthal)
+    }
 
-        let mut len = None;
+    /// Creates a key from a user password, an authoritative engine ID and key extension variant.
+    ///
+    /// The password should be at least 8 characters in length.
+    ///
+    /// The key extension is only used for Aes192PrivKey and Aes256PrivKey if the digest output is
+    /// not enough (e.g: Md5, Sha1)
+    ///
+    /// # Panics
+    ///
+    /// Panics if `passwd` has length 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use snmp_usm::{LocalizedMd5Key, ExtensionVariant};
+    ///
+    /// let key = LocalizedMd5Key::new_with_extension_variant(b"password", b"engine_id", ExtensionVariant::Cisco);
+    /// ```
+    pub fn new_with_extension_variant(passwd: &[u8], engine_id: &[u8], variant: ExtensionVariant) -> Self {
+        let mut bytes = Self::key_from_passwd(passwd, engine_id);
+
+        let orig_len = bytes.len();
 
         while bytes.len() < AES_256_KEY_LEN {
-            let mut data =
-                Self::key_from_passwd(if bytes.is_empty() { passwd } else { &bytes }, engine_id);
+            let extra_bytes = match variant {
+                ExtensionVariant::Blumenthal => {
+                    let mut hashing_fn = D::default();
 
-            if len.is_none() {
-                len = Some(data.len())
-            }
+                    hashing_fn.update(&bytes);
 
-            bytes.append(&mut data);
+                    hashing_fn.finalize_reset().to_vec()
+                }
+
+                ExtensionVariant::Cisco => Self::key_from_passwd(&bytes, engine_id),
+            };
+
+            bytes.extend_from_slice(&extra_bytes);
         }
 
         Self {
             bytes,
             _digest_type: PhantomData,
-            orig_len: len.expect("No bytes generated"),
+            orig_len,
         }
     }
 
