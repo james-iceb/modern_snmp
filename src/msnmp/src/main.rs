@@ -1,10 +1,10 @@
 //! Main doc.
+use clap::Parser as _;
 use exitfailure::ExitFailure;
 use msnmp::{self, Params};
-use structopt::StructOpt;
 
 fn main() -> Result<(), ExitFailure> {
-    let args = Params::from_args();
+    let args = Params::try_parse()?;
     msnmp::run(args)?;
 
     Ok(())
