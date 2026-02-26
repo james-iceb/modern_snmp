@@ -1,6 +1,7 @@
 use crate::client::Client;
 use crate::msg_factory;
 use rand::prelude::*;
+use rand::rng;
 use snmp_mp::{ScopedPdu, SnmpMsg};
 use snmp_usm::{AuthKey, Digest, PrivKey, SecurityParams};
 use std::io::Result;
@@ -131,15 +132,15 @@ where
     S: Step + Copy,
 {
     pub fn new(client: &mut Client, username: &[u8]) -> Result<Self> {
-        let mut rng = thread_rng();
+        let mut rng = rng();
 
         let mut session = Self {
             username: Default::default(),
             engine_id: Default::default(),
             engine_boots: Default::default(),
             engine_time: Default::default(),
-            msg_id: rng.gen_range(SnmpMsg::MSG_ID_MIN, SnmpMsg::MSG_ID_MAX),
-            request_id: rng.gen_range(ScopedPdu::REQUEST_ID_MIN, ScopedPdu::REQUEST_ID_MAX),
+            msg_id: rng.random_range(SnmpMsg::MSG_ID_MIN..SnmpMsg::MSG_ID_MAX),
+            request_id: rng.random_range(ScopedPdu::REQUEST_ID_MIN..ScopedPdu::REQUEST_ID_MAX),
             sync_time: Instant::now(),
             auth_key: None,
             priv_key: None,
