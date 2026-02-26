@@ -12,7 +12,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 rand = "0.10.0"
-snmp_mp = "0.1.0"
-snmp_usm = "0.2.1"
+snmp_mp = {git = "https://github.com/james-iceb/modern_snmp.git", rev = "c22bef2727c7d67f561081cffb69b7c503c0a8f5"}
+snmp_usm = {git = "https://github.com/james-iceb/modern_snmp.git", rev = "c22bef2727c7d67f561081cffb69b7c503c0a8f5"}
 clap = { version = "4.5.60", features = ["derive", "help", "std", "usage"], default-features = false }
 anyhow = "1.0.102"

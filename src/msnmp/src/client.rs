@@ -56,7 +56,7 @@ impl Client {
     {
         let mut security_params = SecurityParams::new();
         security_params
-            .set_auth_params_placeholder()
+            .set_auth_params_placeholder::<D>()
             .set_username(session.username())
             .set_engine_id(session.engine_id())
             .set_engine_boots(session.engine_boots())
