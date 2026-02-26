@@ -3,14 +3,14 @@ use crate::{
     Sha256, Sha512,
 };
 use hmac::SimpleHmac;
-use md5::digest::{core_api::BlockSizeUser, Digest as DigestTrait, Mac};
+use md5::digest::{core_api::BlockSizeUser, Digest as DigestTrait, FixedOutputReset, Mac};
 use std::ops::Range;
 
 // Duration in seconds.
 const TIME_WINDOW: u32 = 150;
 
 /// Convenience wrapper around digest traits. Useful as trait bound where a digest algorithm is needed
-pub trait Digest: DigestTrait + BlockSizeUser + Clone {
+pub trait Digest: DigestTrait + BlockSizeUser + Clone + FixedOutputReset + Default{
     const AUTH_PARAMS_LEN: usize;
     const AUTH_PARAMS_PLACEHOLDER: &'static [u8];
 }
