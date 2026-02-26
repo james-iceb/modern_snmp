@@ -1,4 +1,4 @@
-use md5::digest::{Digest, FixedOutput, Reset, Update};
+use md5::digest::{Digest, FixedOutputReset};
 use std::marker::PhantomData;
 
 // Password to key algorithm:
@@ -45,7 +45,7 @@ impl<'a, D> LocalizedKey<'a, D> {
 
 impl<'a, D> LocalizedKey<'a, D>
 where
-    D: Update + FixedOutput + Reset + Default + Clone,
+    D: Digest + FixedOutputReset + Default + Clone,
 {
     /// Creates a key from a user password and an authoritative engine ID.
     ///
@@ -96,7 +96,7 @@ where
                 ExtensionVariant::Blumenthal => {
                     let mut hashing_fn = D::default();
 
-                    hashing_fn.update(&bytes);
+                    Digest::update(&mut hashing_fn, &bytes);
 
                     hashing_fn.finalize_reset().to_vec()
                 }
@@ -132,7 +132,7 @@ where
                 passwd_index += 1;
             }
 
-            hashing_fn.update(&passwd_buf);
+            Digest::update(&mut hashing_fn, &passwd_buf);
         }
 
         let key = hashing_fn.finalize_reset();
@@ -141,7 +141,7 @@ where
         passwd_buf.extend_from_slice(engine_id);
         passwd_buf.extend_from_slice(&key);
 
-        hashing_fn.update(&passwd_buf);
+        Digest::update(&mut hashing_fn, &passwd_buf);
         hashing_fn.finalize().to_vec()
     }
 }
