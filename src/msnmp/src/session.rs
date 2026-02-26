@@ -107,7 +107,7 @@ impl<'a, D, P, S> Session<'a, D, P, S> {
         request_id
     }
 
-    pub fn auth_key(&self) -> &Option<AuthKey<D>> {
+    pub fn auth_key(&self) -> &Option<AuthKey<'_, D>> {
         &self.auth_key
     }
 
